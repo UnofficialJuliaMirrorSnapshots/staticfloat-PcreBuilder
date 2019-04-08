@@ -1,0 +1,39 @@
+language: julia
+os:
+  - linux
+julia:
+  - 0.6
+notifications:
+  email: false
+git:
+  depth: 99999999
+cache:
+  timeout: 1000
+  directories:
+    - downloads
+env:
+  global:
+    - BINARYBUILDER_DOWNLOADS_CACHE=downloads
+    - BINARYBUILDER_AUTOMATIC_APPLE=true
+sudo: required
+
+# Before anything else, get the latest versions of things
+before_script:
+  - julia -e 'Pkg.clone("https://github.com/JuliaPackaging/BinaryProvider.jl")'
+  - julia -e 'Pkg.clone("https://github.com/JuliaPackaging/BinaryBuilder.jl"); Pkg.build()'
+
+script:
+  - julia build_tarballs.jl
+
+deploy:
+  provider: releases
+  api_key:
+    # Note; this api_key is only valid for staticfloat/PcreBuilder; you need
+    # to make your own: https://docs.travis-ci.com/user/deployment/releases/
+    secure: GpLD0BEDweK3aEL/PDP4Q4InNOOevSaOd3iQx82cyOHG5AkVivrdnGFB8i4GdbNJb4JtJvl4i2BKJr3ohN53aO5wiYpC52QwX0H/d/YKitBAcOGztmBf/XXXCyRUF/HnumPEUqdbFNHmR8eCRCn2JF1YnJjWJL5bPKj2sD+TEbwG91uBJ85q+gG8jtTgtBU+YqbTBWZRNEyB8YFKkGxiVX4iyzjrwUMg87niU/r/J0kBt8oWVwtaKvC4PdlRw7xFN1uhAw+9niGkbt9IY3Q+9pgGgr1khI7HOL1FPcOw2l9l6FxoTe3Msqa0u1te6Mq1Sw6pBnL6LqcBYVjkyq2mi9FbjqHgBBTnSSYyh8/bS7K1BSopgbBjqSm42YBSG/f9PFCgJCOnNrRkG7uSUNYV7yLznGi80D/ERNxubkEj82v0U6soJN3eYaMTkoe4qHcMjd8Ac3id/nVqtnXgUcGuznyMfJixh+ljg3Jttmt869AGXTkZbPStIliX63NdMDsOnXTDlw/mnD/0iF818lFJUYxKlwkjeyDifZSX7YxSFCR+PLTyKI3pXrS1pSGtBzoRVA/imj23zsj7FpqZ/0Z4h2IiXBy3gv17teRaCKNNaRNFsq9VZ7obMB1bAQaz7SCeucygnh17URAX/iqNhSR+B1LZYt4iNQzzjAQ47FmT0WA=
+  file_glob: true
+  file: products/*
+  skip_cleanup: true
+  on:
+    repo: staticfloat/PcreBuilder
+    tags: true
